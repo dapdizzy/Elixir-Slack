@@ -21,7 +21,7 @@ defmodule Slack.Rtm do
     end
   end
 
-  defp option_keys(), do: [:timeout, recv_timeout, :stream_to, :async, :proxy, :proxy_auth, :ssl, :follow_redirect, :max_redirest]
+  defp option_keys(), do: [:timeout, :recv_timeout, :stream_to, :async, :proxy, :proxy_auth, :ssl, :follow_redirect, :max_redirest]
 
   defp options() do
     option_keys
@@ -29,7 +29,7 @@ defmodule Slack.Rtm do
       fn option, options_list ->
         case Aplication.get_env(Slack.Rtm, option) do
           nil -> options_list
-          value -> [{option, value}|option_list]
+          value -> [{option, value}|options_list]
         end
       end)
   end
