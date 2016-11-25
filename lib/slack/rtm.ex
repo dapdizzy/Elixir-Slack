@@ -27,7 +27,7 @@ defmodule Slack.Rtm do
     option_keys
     |> Enum.reduce([],
       fn option, options_list ->
-        case Application.get_env(Slack.Rtm, option) do
+        case Application.get_env(:httpoison, option) do
           nil -> options_list
           value -> [{option, value}|options_list]
         end
