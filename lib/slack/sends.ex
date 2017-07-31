@@ -1,4 +1,5 @@
 defmodule Slack.Sends do
+  @moduledoc "Utility functions for sending slack messages"
   alias Slack.Lookups
 
   @doc """
@@ -35,7 +36,7 @@ defmodule Slack.Sends do
       text: text,
       channel: channel
     }
-      |> JSX.encode!
+      |> Poison.encode!()
       |> send_raw(slack)
   end
 
@@ -47,19 +48,19 @@ defmodule Slack.Sends do
       type: "typing",
       channel: channel
     }
-      |> JSX.encode!
+      |> Poison.encode!()
       |> send_raw(slack)
   end
 
   @doc """
   Notifies slack that the current `slack` user is typing in `channel`.
   """
-  def send_ping(data \\ [], slack) do
+  def send_ping(data \\ %{}, slack) do
     %{
       type: "ping"
     }
-      |> Dict.merge(data)
-      |> JSX.encode!
+      |> Map.merge(Map.new(data))
+      |> Poison.encode!()
       |> send_raw(slack)
   end
 
@@ -71,13 +72,15 @@ defmodule Slack.Sends do
   end
 
   defp open_im_channel(token, user_id, on_success, on_error) do
+    url = Application.get_env(:slack, :url, "https://slack.com")
+
     im_open = HTTPoison.post(
-      "https://slack.com/api/im.open",
+      url <> "/api/im.open",
       {:form, [token: token, user: user_id]}
     )
     case im_open do
       {:ok, response} ->
-        case JSX.decode!(response.body, [{:labels, :atom}]) do
+        case Poison.Parser.parse!(response.body, keys: :atoms) do
           %{ok: true, channel: %{id: id}} -> on_success.(id)
           _ -> on_error.()
         end

@@ -13,17 +13,17 @@ new [bot integration].
 
 ## Installing
 
-Add Slack to your `mix.exs` `application` and `dependencies` functions.
+Add Slack to your `mix.exs` `dependencies` function.
 
 [websocket_client]: https://github.com/jeremyong/websocket_client
 
 ```elixir
 def application do
-  [applications: [:logger, :slack]]
+  [extra_applications: [:logger]]
 end
 
 def deps do
-  [{:slack, "~> 0.9.0"}]
+  [{:slack, "~> 0.12.0"}]
 end
 ```
 
@@ -119,6 +119,15 @@ names = Slack.Web.Users.list(%{token: "TOKEN_HERE"})
 |> Enum.map(fn(member) ->
   member["real_name"]
 end)
+```
+
+## Testing
+
+For integration tests, you can change the default Slack URL to your fake Slack
+server:
+
+```elixir
+config :slack, url: "http://localhost:8000"
 ```
 
 [documentation]: http://hexdocs.pm/slack/

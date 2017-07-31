@@ -1,11 +1,18 @@
 defmodule Slack.State do
+  @moduledoc "Slack state"
   @behaviour Access
 
   def fetch(client, key)
   defdelegate fetch(client, key), to: Map
 
+  def get(client, key, default)
+  defdelegate get(client, key, default), to: Map
+
   def get_and_update(client, key, function)
   defdelegate get_and_update(client, key, function), to: Map
+
+  def pop(client, key)
+  defdelegate pop(client, key), to: Map
 
   defstruct [
     :process,

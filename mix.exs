@@ -3,26 +3,28 @@ defmodule Slack.Mixfile do
 
   def project do
     [app: :slack,
-     version: "0.9.0",
+     version: "0.12.0",
      elixir: "~> 1.2",
      name: "Slack",
-     deps: deps,
-     docs: docs,
+     deps: deps(),
+     docs: docs(),
      source_url: "https://github.com/BlakeWilliams/Elixir-Slack",
      description: "A Slack Real Time Messaging API client.",
-     package: package]
+     package: package()]
   end
 
   def application do
-    [applications: [:logger, :httpoison, :hackney, :exjsx, :crypto]]
+    [applications: [:logger, :httpoison, :hackney, :crypto, :websocket_client]]
   end
 
   defp deps do
-    [{:httpoison, "~> 0.9.0"},
-     {:exjsx, "~> 3.2.0"},
-     {:websocket_client, github: "dapdizzy/websocket_client", branch: "dapdizzy"},
+    [{:httpoison, "~> 0.11"},
+     {:websocket_client, "~> 1.2.4"},
+     {:poison, "~> 3.0"},
      {:earmark, "~> 0.2.0", only: :dev},
-     {:ex_doc, "~> 0.12", only: :dev}]
+     {:ex_doc, "~> 0.12", only: :dev},
+     {:credo, "~> 0.5", only: [:dev, :test]}
+   ]
   end
 
   def docs do

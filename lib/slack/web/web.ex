@@ -8,8 +8,9 @@ defmodule Slack.Web do
 
   defp format_documentation(files) do
     Enum.reduce(files, %{}, fn(file, module_names) ->
-      json = File.read!("#{__DIR__}/docs/#{file}")
-      |> JSX.decode!
+      json =
+        File.read!("#{__DIR__}/docs/#{file}")
+        |> Poison.Parser.parse!()
 
       doc = Slack.Web.Documentation.new(json, file)
 
@@ -39,18 +40,31 @@ Enum.each(Slack.Web.get_documentation, fn({module_name, functions}) ->
       def unquote(function_name)(unquote_splicing(arguments), optional_params \\ %{}) do
         required_params = unquote(argument_value_keyword_list)
 
+        url = Application.get_env(:slack, :url, "https://slack.com")
+
         params = optional_params
         |> Map.to_list
         |> Keyword.merge(required_params)
         |> Keyword.put_new(:token, Application.get_env(:slack, :api_token))
+        |> Enum.reject(fn {_, v} -> v == nil end)
 
         %{body: body} = HTTPoison.post!(
-          "https://slack.com/api/#{unquote(doc.endpoint)}",
-          {:form, params}
+          "#{url}/api/#{unquote(doc.endpoint)}",
+          params(unquote(function_name), params, unquote(arguments))
         )
 
-        JSX.decode!(body)
+        Poison.Parser.parse!(body)
       end
     end)
+
+    defp params(:upload, params, arguments) do
+      file = arguments |> List.first
+      params = Enum.map(params, fn({key, value}) ->
+        {"", to_string(value), {"form-data", [{"name", key}]}, []}
+      end)
+
+      {:multipart, params ++ [{:file, file, []}]}
+    end
+    defp params(_, params, _), do: {:form, params}
   end
 end)
